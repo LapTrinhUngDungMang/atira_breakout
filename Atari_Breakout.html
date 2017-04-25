@@ -25,9 +25,9 @@
 				this.canvas.width = 0.9 * window.innerWidth;
 				this.canvas.height = 0.7 * window.innerHeight;
 				this.context = this.canvas.getContext("2d");
+				this.canvas.style.cursor = "none";
 				document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 				this.setInterval = setInterval(updateGameArea,20);
-				this.canvas.style.cursor = "none";
 				window.addEventListener('mousemove',function(e){
 					myGameArea.x = e.pageX;
 					myGameArea.y = e.pageY;
@@ -43,11 +43,15 @@
 		function component(width, height, color, x, y){
 				this.width = width;
 				this.height = height;
+				this.speedX = 0;
+				this.speedY = 0;
 				this.x = x;
 				this.y = y;
+				this.update = function(){
 				ctx = myGameArea.context;
 				ctx.fillStyle = color;
 				ctx.fillRect(this.x,this.y,this.width,this.height);
+				}
 		}
 
 		//Cap nhat giao dien game
@@ -56,7 +60,7 @@
 			if(myGameArea.x && myGameArea.y)
 			{
 				myPaddle.x = myGameArea.x;
-				myPaddle.y = myGameArea.y;
+				myPaddle.y = myGameArea.canvas.height-15;
 			}
 			myPaddle.update();
 		}
