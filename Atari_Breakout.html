@@ -9,9 +9,16 @@
 <body onload="StartGame()">
 <div class="container">
 	<script>
+		//Khoi tao gia tri cua paddle
+		var myPaddle;
+
+		//Khoi tao game
 		function StartGame(){
 			myGameArea.start();
+			myPaddle = new component(100, 10,"red",myGameArea.canvas.width/2,myGameArea.canvas.height-15);
 		}
+		
+		//Ve khung game
 		var myGameArea = {
 			canvas: document.createElement("canvas"),
 			start: function(){
@@ -19,7 +26,39 @@
 				this.canvas.height = 0.7 * window.innerHeight;
 				this.context = this.canvas.getContext("2d");
 				document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+				this.setInterval = setInterval(updateGameArea,20);
+				this.canvas.style.cursor = "none";
+				window.addEventListener('mousemove',function(e){
+					myGameArea.x = e.pageX;
+					myGameArea.y = e.pageY;
+				})
+			},
+			//Xoa toa do truoc do
+			clear : function(){
+				this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
 			}
+		}
+
+		//Thiet lap gia tri cua cac vat the
+		function component(width, height, color, x, y){
+				this.width = width;
+				this.height = height;
+				this.x = x;
+				this.y = y;
+				ctx = myGameArea.context;
+				ctx.fillStyle = color;
+				ctx.fillRect(this.x,this.y,this.width,this.height);
+		}
+
+		//Cap nhat giao dien game
+		function updateGameArea(){
+			myGameArea.clear();
+			if(myGameArea.x && myGameArea.y)
+			{
+				myPaddle.x = myGameArea.x;
+				myPaddle.y = myGameArea.y;
+			}
+			myPaddle.update();
 		}
 	</script>
 </div>
