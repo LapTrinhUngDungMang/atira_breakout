@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Atari Breakout</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+</head>
+<body onload="StartGame()">
+<div class="container">
+	<script>
+		function StartGame(){
+			myGameArea.start();
+		}
+		var myGameArea = {
+			canvas: document.createElement("canvas"),
+			start: function(){
+				this.canvas.width = 0.9 * window.innerWidth;
+				this.canvas.height = 0.7 * window.innerHeight;
+				this.context = this.canvas.getContext("2d");
+				document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+			}
+		}
+	</script>
+</div>
+</body>
+</html>
