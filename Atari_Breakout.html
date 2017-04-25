@@ -10,7 +10,6 @@
 <div class="container">
 	<script>
 		//Khoi tao gia tri cua paddle
-		var myPaddle;
 		var myBall;
 		var ballX;
 		var ballY;
@@ -18,8 +17,14 @@
 		var paddleY;
 		var ballSpeedX = 10;
 		var ballSpeedY = 4;
-
-
+		var brickRowCount=5;
+		var brickColumnCount=11;
+		var brickWidth=95;
+		var brickHeight=20;
+		var brickPadding=10;
+		var brickOffsetTop=30;
+		var brickOffsetLeft=30;
+		var bricks=[];
 		//Khoi tao game
 		function StartGame(){
 			myGameArea.start();
@@ -31,6 +36,12 @@
 		
 			myPaddle = new drawnPaddle(100, 10,"red", paddleX, paddleY);
 			myBall = new drawnBall("black", ballX , ballY);
+			for(c=0;c<brickColumnCount;c++){
+				bricks[c]=[];
+				for(r=0;r<brickRowCount;r++){
+					bricks[c][r] = {x:0,y:0}
+				}
+			}
 		}
 		
 		//Ve khung game
@@ -42,7 +53,7 @@
 				this.context = this.canvas.getContext("2d");
 				this.canvas.style.cursor = "none";
 				document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-				this.setInterval = setInterval(updateGameArea,20);
+				this.setInterval = setInterval(updateGameArea,25);
 
 				window.addEventListener('mousemove',function(e){
 					myGameArea.x = e.pageX;
@@ -56,7 +67,7 @@
 			}
 		}
 
-		//Thiet lap gia tri cua cac vat the dat oc
+		//Thiet lap gia tri cua cac vat the
 		function drawnPaddle(width, height, color, x, y){
 				this.width = width;
 				this.height = height;
@@ -73,7 +84,22 @@
 				}
 		}
 
-		
+		function drawnBricks(){
+			for(c=0;c<brickColumnCount;c++){
+				for(r=0;r<brickRowCount;r++){
+					var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+            		var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+					bricks[c][r].x = brickX;
+					bricks[c][r].y = brickY;
+						ctx = myGameArea.context;
+						ctx.beginPath();
+						ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+						ctx.fillStyle = "green";
+						ctx.fill();
+						ctx.closePath();
+				}
+			}
+		}
 
 		function drawnBall(color, x, y){
 			//this.speedX = 0;
@@ -103,6 +129,7 @@
 			moveBall();
 			myPaddle.update();
 			myBall.update();
+			drawnBricks();
 		}
 
 		function moveBall(){
