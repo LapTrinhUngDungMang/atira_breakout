@@ -10,6 +10,8 @@
 <div class="container">
 	<script>
 		//Khoi tao gia tri cua paddle
+		var width = 0.9 * window.innerWidth;
+		var height = 0.7 * window.innerHeight;
 		var myPaddle;
 		var myBall;
 		var ballX;
@@ -31,7 +33,7 @@
  		var brickOffsetLeft = 60;
  		var bricks = [];
  		var score = 0;
-
+ 		var lives = 3;
 
 		//Khoi tao game
 		function StartGame(){
@@ -60,8 +62,8 @@
 
 			//bắt đầu chơi
 			start: function(){
-				this.canvas.width = 0.9 * window.innerWidth; //chiều dài vùng đc phép chơi = 90% chiều dài của sổ
-				this.canvas.height = 0.7 * window.innerHeight; // chiều cao vùng đc phép chơi = 70% chiều cao cửa sổ
+				this.canvas.width = width; //chiều dài vùng đc phép chơi = 90% chiều dài của sổ
+				this.canvas.height = height; // chiều cao vùng đc phép chơi = 70% chiều cao cửa sổ
 				this.context = this.canvas.getContext("2d");
 				this.canvas.style.cursor = "none";
 				document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -77,15 +79,15 @@
 
 				this.canvas.addEventListener('mousedown', function (evt) {
 				if(firstClick) //chỉ khi mới bắt đầu chơi thì click chuột banh mới di chuyển
-				{
-					//random tọa độ banh bắt đầu di chuyển
-					ballSpeedX = Math.floor(Math.random()*(-10)+10);			
-					ballSpeedY = Math.floor(Math.random()*8+4);	
+					{
+						//random tọa độ banh bắt đầu di chuyển
+						ballSpeedX = Math.floor(Math.random()*(-10)+10);			
+						ballSpeedY = Math.floor(Math.random()*8+4);	
 
-					myBall.x = ballX = ballX + ballSpeedX;
-					myBall.y = ballY = ballY - ballSpeedY;
-					moveBallWithPaddle = firstClick = false;
-				}
+						myBall.x = ballX = ballX + ballSpeedX;
+						myBall.y = ballY = ballY - ballSpeedY;
+						moveBallWithPaddle = firstClick = false;
+					}
 				});
 			},
 
@@ -157,6 +159,13 @@
 			ctx.fillText("Score: " + score, 8, 20);
 		}
 
+		function drawLives () {
+ 			ctx = myGameArea.context;
+			ctx.font = "16px Arial";
+			ctx.fillStyle = "#0095DD";
+			ctx.fillText("Lives: " + lives, width - 100 , 20);
+		}
+
 		//Cap nhat giao dien game
 		function updateGameArea(){
 			myGameArea.clear();
@@ -169,6 +178,7 @@
 					myBall.y = ballY = myPaddle.y - 15;
 				}
 			}
+			drawLives();
 			drawScore();
 			drawnBricks();
 			myPaddle.update();
@@ -220,6 +230,12 @@
 				}
 				else
 				{
+					lives--;
+					if(lives < 0)
+					{
+						alert("YOU FAILED! DO YOU WANT TO PLAY AGAIN?")
+						document.location.reload();
+					}
 					resetBall();
 				}
 			}
@@ -237,6 +253,11 @@
 							ballSpeedY = -ballSpeedY;
 							bricks[c][r].hit = true;
 							score++;
+							if(score === brickRowCount * brickColumnCount){
+								alert("MISSION COMPLETED!!");
+								document.location.reload();
+							}
+
 						}
 					}
 				}
