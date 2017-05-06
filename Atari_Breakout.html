@@ -169,21 +169,23 @@
 		//Cap nhat giao dien game
 		function updateGameArea(){
 			myGameArea.clear();
-			if(myGameArea.x && myGameArea.y)
-			{
-				myPaddle.x = myGameArea.x;
-				myPaddle.y = myGameArea.canvas.height-15;
-				if(moveBallWithPaddle){
-					myBall.x = ballX = myGameArea.x + PADDLE_WIDTH/2;
-					myBall.y = ballY = myPaddle.y - 15;
-				}
-			}
 			drawLives();
 			drawScore();
 			drawnBricks();
 			myPaddle.update();
 			myBall.update();
 			moveBall();
+			movePaddle();
+		}
+
+		function movePaddle(){
+			if(myGameArea.x < myGameArea.canvas.width-100){
+								myPaddle.x = myGameArea.x;
+			if(moveBallWithPaddle){
+					myBall.x = ballX = myGameArea.x + PADDLE_WIDTH/2;
+					myBall.y = ballY = myPaddle.y - 15;
+				}
+			}
 		}
 
 		// Hàm di chuyển ball khi được bắn lên
