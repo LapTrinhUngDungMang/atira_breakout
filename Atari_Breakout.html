@@ -9,51 +9,53 @@
 <body onload="StartGame()">
 <div class="container">
 	<script>
-		//Khoi tao gia tri cua paddle
-		var width = 0.9 * window.innerWidth;
-		var height = 0.7 * window.innerHeight;
+		const PADDLE_WIDTH = 100;
+		const PADDLE_THICKNESS = 10;
+ 		const BRICK_WIDTH = 83;
+ 		const BRICK_HEIGHT = 20;
+		const width = 0.9 * window.innerWidth;
+		const height = 0.7 * window.innerHeight;
+		const brickRowCount = 5;
+ 		const brickColumnCount = 12;
+ 		const brickPadding = 3;
+ 		const brickOffsetTop = 30;
+ 		const brickOffsetLeft = 60;
+ 		const RADIUS_BALL = 8;
 		var myPaddle;
 		var myBall;
 		var ballX;
 		var ballY;
 		var paddleX;
 		var paddleY;
-		var ballSpeedX=0;
-		var ballSpeedY=0;
+		var ballSpeedX = 0;
+		var ballSpeedY = 0;
 		var firstClick = true;
-		var moveBallWithPaddle = true;
-		const PADDLE_WIDTH = 100;
-		const PADDLE_THICKNESS = 10;
-		var brickRowCount = 5;
- 		var brickColumnCount = 12;
- 		const BRICK_WIDTH = 83;
- 		const BRICK_HEIGHT = 20;
- 		var brickPadding = 10;
- 		var brickOffsetTop = 30;
- 		var brickOffsetLeft = 60;
+		var moveBallWithPaddle = true;		
  		var bricks = [];
  		var score = 0;
- 		var lives = 3;
+
+
 
 		//Khoi tao game
 		function StartGame(){
-
-			myGameArea.start();
+			
+			myGameArea.start();	
 
 			paddleX = myGameArea.canvas.width/2; //tọa độ x của paddle ban đầu
 			paddleY = myGameArea.canvas.height-15; //tọa độ y của paddle ban đâu	
 			myPaddle = new drawnPaddle( PADDLE_WIDTH, PADDLE_THICKNESS,"red", paddleX, paddleY); //khởi tạo paddle
-
+			mySoundCollision = new sound("bounce.wav");
+			mySoundLose = new sound("lose.wav");
 			myBall = new drawnBall("black", ballX , ballY); //khởi tạo ball
+
 			resetBall();
-			
+
 			for(var c = 0; c < brickColumnCount; c++){				
  				bricks[c]=[];
  				for(var r = 0; r < brickRowCount; r++){
  					bricks[c][r] = {x:0, y:0, hit:false};
  				}
- 			}
-					
+ 			}	
 		}
 		
 		//Ve khung game
@@ -65,7 +67,7 @@
 				this.canvas.width = width; //chiều dài vùng đc phép chơi = 90% chiều dài của sổ
 				this.canvas.height = height; // chiều cao vùng đc phép chơi = 70% chiều cao cửa sổ
 				this.context = this.canvas.getContext("2d");
-				this.canvas.style.cursor = "none";
+				// this.canvas.style.cursor = "none";
 				document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 				
 				//cứ mỗi 20 milisec sẽ update lại đồ họa 1 lần
@@ -73,22 +75,24 @@
 
 				//Xét sự kiện di chuyển chuột để di chuyển thanh paddle
 				window.addEventListener('mousemove',function(e){
-					myGameArea.x = e.pageX;
+					myGameArea.x = e.pageX ;
 					myGameArea.y = e.pageY;
 				});
 
 				this.canvas.addEventListener('mousedown', function (evt) {
 				if(firstClick) //chỉ khi mới bắt đầu chơi thì click chuột banh mới di chuyển
 					{
-						//random tọa độ banh bắt đầu di chuyển
-						ballSpeedX = Math.floor(Math.random()*(-10)+10);			
-						ballSpeedY = Math.floor(Math.random()*8+4);	
-
-						myBall.x = ballX = ballX + ballSpeedX;
-						myBall.y = ballY = ballY - ballSpeedY;
+						var randomSpeed;
+						do {
+						  randomSpeed = Math.floor(Math.random()*(-10) + 10);
+						}
+						while (-5 <= randomSpeed && randomSpeed <= 5);
+						ballSpeedX = randomSpeed;
+						ballSpeedY = randomSpeed;
 						moveBallWithPaddle = firstClick = false;
 					}
 				});
+				
 			},
 
 			//Xoa toa do truoc do
@@ -101,11 +105,8 @@
 		function drawnPaddle(width, height, color, x, y){
 				this.width = width;
 				this.height = height;
-				//this.speedX = 0;
-				//this.speedY = 0;
 				this.x = x;
 				this.y = y;
-				///this.radius = radius;
 				
 				this.update = function(){
 					ctx = myGameArea.context;
@@ -117,16 +118,13 @@
 		
 		// Hàm vẽ ball với thuộc tính màu, vị trí tọa độ
 		function drawnBall(color, x, y){
-			//this.speedX = 0;
-			//this.speedY = 0;
 			this.x = x;
 			this.y = y;
-			///this.radius = radius;
 			this.update = function(){
 				ctx = myGameArea.context;
 				ctx.fillStyle = color;
 				ctx.beginPath();
-				ctx.arc(this.x, this.y, 8, 0,Math.PI*2,false);
+				ctx.arc(this.x, this.y, RADIUS_BALL, 0,Math.PI*2);
 				ctx.fill();
 			}
 		}
@@ -159,17 +157,9 @@
 			ctx.fillText("Score: " + score, 8, 20);
 		}
 
-		function drawLives () {
- 			ctx = myGameArea.context;
-			ctx.font = "16px Arial";
-			ctx.fillStyle = "#0095DD";
-			ctx.fillText("Lives: " + lives, width - 100 , 20);
-		}
-
 		//Cap nhat giao dien game
 		function updateGameArea(){
 			myGameArea.clear();
-			drawLives();
 			drawScore();
 			drawnBricks();
 			myPaddle.update();
@@ -179,82 +169,86 @@
 		}
 
 		function movePaddle(){
-			if(myGameArea.x < myGameArea.canvas.width-100){
-								myPaddle.x = myGameArea.x;
-			if(moveBallWithPaddle){
-					myBall.x = ballX = myGameArea.x + PADDLE_WIDTH/2;
-					myBall.y = ballY = myPaddle.y - 15;
+			if(myGameArea.x < myGameArea.canvas.width - PADDLE_WIDTH/2){
+				myPaddle.x = myGameArea.x - PADDLE_WIDTH / 2;
+				if(moveBallWithPaddle){
+					myBall.x = ballX = myPaddle.x + PADDLE_WIDTH/2;
+					myBall.y = ballY = myPaddle.y - PADDLE_THICKNESS;
 				}
 			}
 		}
 
 		// Hàm di chuyển ball khi được bắn lên
 		function moveBall(){
+			
+			
 			myBall.x = ballX = ballX + ballSpeedX;
 			myBall.y = ballY = ballY - ballSpeedY;
 			
+			collisionDetectWithBricks();
 			collisionDetectWithWall();
 		}
 
 		function collisionDetectWithWall(){
 
-
-			collisionDetectWithBricks();
 			//đụng tường trái
-			if(ballX < 0) {
+			if(ballX < 0 ) {
 				ballSpeedX = -ballSpeedX;
 			}
 
 			//đụng tường phải
-			if(ballX > myGameArea.canvas.width) {
+			if(ballX > myGameArea.canvas.width ) {
 				ballSpeedX = -ballSpeedX;
 			}
 
 			//đụng tường trên
-			if(ballY < 0) {
+			if(ballY < 0 ) {
 				ballSpeedY = -ballSpeedY;
 			}
 
-			//dụng thanh paddle, hoặc tường dưới thì mất ball
-			if(ballY > myPaddle.y - 15) {
-				if(ballX > myPaddle.x && ballX < myPaddle.x + PADDLE_WIDTH/2){
+			//đụng thanh paddle thì bật lên hoặc tường dưới thì mất ball
+			if(ballY > myPaddle.y - PADDLE_THICKNESS) {
+				if(ballX > myPaddle.x - RADIUS_BALL*2 && ballX <= myPaddle.x + PADDLE_WIDTH/2){
 
 					ballSpeedX = Math.floor(Math.random()*(-10));			
-					//ballSpeedY = Math.floor(Math.random()*10+6);	
+					
+					ballSpeedY = -ballSpeedY;
+					mySoundCollision.play();
+					
+				}else if(ballX > myPaddle.x + PADDLE_WIDTH/2 && ballX < myPaddle.x + PADDLE_WIDTH + RADIUS_BALL){
+
+					ballSpeedX = Math.floor(Math.random()*(10));
 
 					ballSpeedY = -ballSpeedY;
-				}else if(ballX > myPaddle.x + PADDLE_WIDTH/2 && ballX < myPaddle.x + PADDLE_WIDTH){
-
-					ballSpeedX = Math.floor(Math.random()*(10));			
-					//ballSpeedY = Math.floor(Math.random()*10+6);	
-
-					ballSpeedY = -ballSpeedY;
+					mySoundCollision.play();
 				}
 				else
 				{
-					lives--;
-					if(lives < 0)
-					{
+					mySoundLose.play();
+					if(ballY > myGameArea.canvas.height){
 						alert("YOU FAILED! DO YOU WANT TO PLAY AGAIN?")
-						document.location.reload();
-					}
-					resetBall();
+						document.location.reload();	
+					}		
 				}
+				
 			}
+
+			
 		}
 
 		function collisionDetectWithBricks(){
+			
 			for(var c = 0; c < brickColumnCount; c++){
  				for(var r = 0; r < brickRowCount; r++){
  					if(bricks[c][r].hit === false){
 			 			if(ballX > bricks[c][r].x && ballX < bricks[c][r].x+BRICK_WIDTH && ballY > bricks[c][r].y && ballY < bricks[c][r].y+BRICK_HEIGHT) {
 			 				
-			 				ballSpeedX = Math.floor(Math.random()*(-10)+6);			
-							// ballSpeedY = Math.floor(Math.random()*10+6);	
+			 				ballSpeedX = ballSpeedX;//Math.floor(Math.random()*(-10)+10);
 
 							ballSpeedY = -ballSpeedY;
 							bricks[c][r].hit = true;
 							score++;
+							mySoundCollision.play();
 							if(score === brickRowCount * brickColumnCount){
 								alert("MISSION COMPLETED!!");
 								document.location.reload();
@@ -267,11 +261,26 @@
 		}
 
 		function resetBall (){
+
 			firstClick = moveBallWithPaddle = true;
-			myBall.x = ballX = paddleX + PADDLE_WIDTH/2; // tọa độ x của ball ban đâu, nằm giữa thanh paddle
-			myBall.y = ballY = paddleY - 15; //tọa độ y của ball ban đầu, cách paddle 15 pixel 
+			myBall.x = ballX = myPaddle.x + PADDLE_WIDTH/2; // tọa độ x của ball ban đâu, nằm giữa thanh paddle
+			myBall.y = ballY = myPaddle.y - PADDLE_THICKNESS; //tọa độ y của ball ban đầu, cách paddle 15 pixel
 		}
 		
+		function sound(src) {
+		    this.sound = document.createElement("audio");
+		    this.sound.src = src;
+		    this.sound.setAttribute("preload", "auto");
+		    this.sound.setAttribute("controls", "none");
+		    this.sound.style.display = "none";
+		    document.body.appendChild(this.sound);
+		    this.play = function(){
+		        this.sound.play();
+		    }
+		    this.stop = function(){
+		        this.sound.pause();
+		    }
+		}
 	</script>
 </div>
 </body>
